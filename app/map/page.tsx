@@ -25,19 +25,15 @@ export default function MapPage() {
   const [touchStartZoom, setTouchStartZoom] = useState(1)
 
   useEffect(() => {
-    // Проверяем версию данных и обновляем если нужно
-    const DATA_VERSION = '5.0'
-    const currentVersion = storage.get('dataVersion', '1.0')
+    const storedProperties = storage.get<Property[]>(STORAGE_KEYS.PROPERTIES, [])
     
-    if (currentVersion !== DATA_VERSION) {
+    if (!storedProperties.length) {
       import('@/data/mockData').then(({ initialProperties }) => {
         storage.set(STORAGE_KEYS.PROPERTIES, initialProperties)
-        storage.set('dataVersion', DATA_VERSION)
         setAllProperties(initialProperties.filter((p) => p.available))
       })
     } else {
-      const allProps = storage.get<Property[]>(STORAGE_KEYS.PROPERTIES, [])
-      setAllProperties(allProps.filter((p) => p.available))
+      setAllProperties(storedProperties.filter((p) => p.available))
     }
   }, [])
 
@@ -438,7 +434,7 @@ export default function MapPage() {
       {/* Карточка выбранного объекта или список объектов */}
       {selectedProperties.length > 0 ? (
         <div className="absolute bottom-20 left-0 right-0 p-4 z-30 animate-slide-up">
-          {selectedProperties.length === 1 ? (
+          {selectedProperties.length === 1 && selectedProperty ? (
             // Один объект - показываем детальную карточку
             <div
               onClick={() => router.push(`/property/${selectedProperty?.id}`)}

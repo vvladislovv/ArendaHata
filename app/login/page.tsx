@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { storage, STORAGE_KEYS } from '@/lib/storage'
+import { User } from '@/data/mockData'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -11,7 +12,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   const handleLogin = () => {
-    const user = storage.get(STORAGE_KEYS.USER, null)
+    const user = storage.get<User | null>(STORAGE_KEYS.USER, null)
     if (user && email === user.email) {
       storage.set(STORAGE_KEYS.IS_LOGGED_IN, true)
       router.push('/home')

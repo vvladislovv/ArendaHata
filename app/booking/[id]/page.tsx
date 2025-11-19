@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { storage, STORAGE_KEYS } from '@/lib/storage'
-import { Property, Booking } from '@/data/mockData'
+import { Property, Booking, User } from '@/data/mockData'
 
 export default function BookingPage() {
   const router = useRouter()
@@ -25,26 +25,27 @@ export default function BookingPage() {
       return
     }
 
-    let user = storage.get(STORAGE_KEYS.USER, null)
+    const bookingDate = selectedDate
+    let user = storage.get<User | null>(STORAGE_KEYS.USER, null)
     if (!user) {
       // Создаем дефолтного пользователя если его нет
       import('@/data/mockData').then(({ initialUsers }) => {
-        storage.set(STORAGE_KEYS.USER, initialUsers[0])
-        user = initialUsers[0]
-        createBooking(user)
+        const defaultUser = initialUsers[0]
+        storage.set(STORAGE_KEYS.USER, defaultUser)
+        createBooking(defaultUser, bookingDate)
       })
       return
     }
-    createBooking(user)
+    createBooking(user, bookingDate)
   }
 
-  const createBooking = (user: any) => {
+  const createBooking = (user: User, bookingDate: string) => {
     const bookings = storage.get<Booking[]>(STORAGE_KEYS.BOOKINGS, [])
     const newBooking: Booking = {
       id: Date.now().toString(),
       propertyId: property!.id,
       userId: user.id,
-      date: selectedDate,
+      date: bookingDate,
       adults,
       status: 'pending',
     }

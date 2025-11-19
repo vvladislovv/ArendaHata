@@ -30,19 +30,15 @@ export default function HomePage() {
       setUser(currentUser)
     }
 
-    // Проверяем версию данных и загружаем рекомендуемые объекты
-    const DATA_VERSION = '5.0'
-    const currentVersion = storage.get('dataVersion', '1.0')
-    
-    if (currentVersion !== DATA_VERSION) {
+    // Загружаем рекомендуемые объекты, при отсутствии данных подтягиваем мок
+    const allProperties = storage.get<Property[]>(STORAGE_KEYS.PROPERTIES, [])
+    if (!allProperties.length) {
       import('@/data/mockData').then(({ initialProperties }) => {
         storage.set(STORAGE_KEYS.PROPERTIES, initialProperties)
-        storage.set('dataVersion', DATA_VERSION)
         const featured = initialProperties.filter((p) => p.featured && p.available).slice(0, 10)
         setRecommendedProperties(featured)
       })
     } else {
-      const allProperties = storage.get<Property[]>(STORAGE_KEYS.PROPERTIES, [])
       const featured = allProperties.filter((p) => p.featured && p.available).slice(0, 10)
       setRecommendedProperties(featured)
     }

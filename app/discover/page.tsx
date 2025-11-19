@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { storage, STORAGE_KEYS } from '@/lib/storage'
 import { Property } from '@/data/mockData'
@@ -21,7 +21,7 @@ const RUSSIAN_CITIES = [
   'Уфа',
 ]
 
-export default function DiscoverPage() {
+function DiscoverContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [properties, setProperties] = useState<Property[]>([])
@@ -32,10 +32,7 @@ export default function DiscoverPage() {
   const [showCityPicker, setShowCityPicker] = useState(false)
 
   useEffect(() => {
-    // Проверяем версию данных и обновляем если нужно
-    const DATA_VERSION = '5.0'
-    const currentVersion = storage.get('dataVersion', '1.0')
-    
+    // Загружаем данные, при отсутствии инициализируем моками
     const loadProperties = (props: Property[]) => {
       setProperties(props)
       
@@ -84,15 +81,14 @@ export default function DiscoverPage() {
       setFilteredProperties(filtered)
     }
     
-    if (currentVersion !== DATA_VERSION) {
+    const storedProperties = storage.get<Property[]>(STORAGE_KEYS.PROPERTIES, [])
+    if (!storedProperties.length) {
       import('@/data/mockData').then(({ initialProperties }) => {
         storage.set(STORAGE_KEYS.PROPERTIES, initialProperties)
-        storage.set('dataVersion', DATA_VERSION)
         loadProperties(initialProperties)
       })
     } else {
-      const allProperties = storage.get<Property[]>(STORAGE_KEYS.PROPERTIES, [])
-      loadProperties(allProperties)
+      loadProperties(storedProperties)
     }
   }, [searchParams, selectedCity])
 
@@ -300,6 +296,20 @@ export default function DiscoverPage() {
 
       <BottomNav />
     </div>
+  )
+}
+
+export default function DiscoverPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F5F5F5] pb-24 flex items-center justify-center">
+          Загрузка...
+        </div>
+      }
+    >
+      <DiscoverContent />
+    </Suspense>
   )
 }
 

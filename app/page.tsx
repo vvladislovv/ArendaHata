@@ -9,13 +9,9 @@ export default function SplashPage() {
   const [showLogo, setShowLogo] = useState(true)
 
   useEffect(() => {
-    // Инициализация данных при первом запуске или обновлении версии
-    const DATA_VERSION = '5.0' // Версия данных - увеличиваем при обновлении
-    const currentVersion = storage.get('dataVersion', '1.0')
     const isInitialized = storage.get('initialized', false)
     
-    // Обновляем данные если версия изменилась или данные не инициализированы
-    if (!isInitialized || currentVersion !== DATA_VERSION) {
+    if (!isInitialized) {
       import('@/data/mockData').then(({ initialUsers, initialProperties, initialChats }) => {
         // Сохраняем пользователя только если его нет
         const currentUser = storage.get(STORAGE_KEYS.USER, null)
@@ -35,7 +31,6 @@ export default function SplashPage() {
         }
         
         storage.set('initialized', true)
-        storage.set('dataVersion', DATA_VERSION)
       })
     }
 
