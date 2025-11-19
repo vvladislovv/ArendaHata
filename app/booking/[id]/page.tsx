@@ -48,6 +48,7 @@ export default function BookingPage() {
       date: bookingDate,
       adults,
       status: 'pending',
+      rentType,
     }
 
     bookings.push(newBooking)

@@ -37,6 +37,7 @@ export const STORAGE_KEYS = {
   USERS: 'users', // Все пользователи для чатов
   PROPERTIES: 'properties',
   BOOKINGS: 'bookings',
+  PURCHASES: 'purchases',
   CHATS: 'chats',
   IS_LOGGED_IN: 'isLoggedIn',
 };

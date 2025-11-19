@@ -128,18 +128,25 @@ export default function PropertyDetailPage() {
 
         <div className="space-y-3 mb-6">
           {property.type === 'buy' ? (
-            <button
-              onClick={() => {
-                // Показываем модальное окно с телефоном
-                const phone = '+7 (495) 123-45-67'
-                if (window.confirm(`Позвонить по телефону: ${phone}?`)) {
-                  window.location.href = `tel:${phone}`
-                }
-              }}
-              className="w-full py-3 bg-[#0078D4] text-white font-medium rounded-lg hover:bg-[#0066B2] active:scale-95 transition-all shadow-md"
-            >
-              📞 Позвонить для покупки
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => router.push(`/purchase/${property.id}`)}
+                className="w-full py-3 bg-[#0078D4] text-white font-medium rounded-lg hover:bg-[#0066B2] active:scale-95 transition-all shadow-md"
+              >
+                Купить
+              </button>
+              <button
+                onClick={() => {
+                  const phone = '+7 (495) 123-45-67'
+                  if (window.confirm(`Позвонить по телефону: ${phone}?`)) {
+                    window.location.href = `tel:${phone}`
+                  }
+                }}
+                className="w-full py-3 bg-white border border-gray-300 text-gray-800 font-medium rounded-lg hover:bg-gray-50 active:scale-95 transition-all"
+              >
+                📞 Связаться с агентом
+              </button>
+            </div>
           ) : (
             <button
               onClick={() => router.push(`/booking/${property.id}`)}

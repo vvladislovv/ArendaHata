@@ -21,24 +21,41 @@ export default function CheckoutPage() {
     const found = bookings.find((b) => b.id === params.id)
     setBooking(found || null)
 
+    let initialRentType: 'monthly' | 'daily' = 'monthly'
     if (found) {
+      if (found.rentType) {
+        initialRentType = found.rentType
+      }
       const properties = storage.get<Property[]>(STORAGE_KEYS.PROPERTIES, [])
       const prop = properties.find((p) => p.id === found.propertyId)
       setProperty(prop || null)
     }
     
-    // Получаем тип аренды из URL
     const rentTypeParam = searchParams.get('rentType')
     if (rentTypeParam === 'daily' || rentTypeParam === 'monthly') {
-      setRentType(rentTypeParam)
+      initialRentType = rentTypeParam
     }
+    setRentType(initialRentType)
   }, [params.id, searchParams])
+
+  const handleRentTypeChange = (type: 'monthly' | 'daily') => {
+    if (type === rentType) return
+    setRentType(type)
+    setBooking((prev) => {
+      if (!prev) return prev
+      const updatedBooking = { ...prev, rentType: type }
+      const bookings = storage.get<Booking[]>(STORAGE_KEYS.BOOKINGS, [])
+      const updatedList = bookings.map((b) => (b.id === updatedBooking.id ? updatedBooking : b))
+      storage.set(STORAGE_KEYS.BOOKINGS, updatedList)
+      return updatedBooking
+    })
+  }
 
   const handlePayment = () => {
     if (booking) {
       const bookings = storage.get<Booking[]>(STORAGE_KEYS.BOOKINGS, [])
       const updated = bookings.map((b) =>
-        b.id === booking.id ? { ...b, status: 'confirmed' as const } : b
+        b.id === booking.id ? { ...b, status: 'confirmed' as const, rentType } : b
       )
       storage.set(STORAGE_KEYS.BOOKINGS, updated)
       alert('Бронирование подтверждено!')
@@ -65,6 +82,34 @@ export default function CheckoutPage() {
         </button>
 
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Оформление заказа</h1>
+
+        {property.type === 'rent' && property.priceDaily && (
+          <div className="bg-white rounded-lg p-4 mb-4 shadow-sm border border-gray-200">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Тип аренды</h2>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => handleRentTypeChange('monthly')}
+                className={`flex-1 py-3 rounded-lg font-medium text-sm transition-all ${
+                  rentType === 'monthly'
+                    ? 'bg-[#0078D4] text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                На месяц
+              </button>
+              <button
+                onClick={() => handleRentTypeChange('daily')}
+                className={`flex-1 py-3 rounded-lg font-medium text-sm transition-all ${
+                  rentType === 'daily'
+                    ? 'bg-[#0078D4] text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Посуточно
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white rounded-lg p-4 mb-4 shadow-sm border border-gray-200">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Оплата</h2>
@@ -111,8 +156,8 @@ export default function CheckoutPage() {
             <span className="text-gray-600">Стоимость</span>
             <span className="font-bold text-gray-900">
               {rentType === 'daily' && property.priceDaily
-                ? formatPrice(property.priceDaily)
-                : formatPrice(property.price)}
+                ? `${formatPrice(property.priceDaily)}/сутки`
+                : `${formatPrice(property.price)}/мес`}
             </span>
           </div>
           <div className="flex justify-between mb-2 text-sm">

@@ -38,6 +38,16 @@ export interface Booking {
   date: string;
   adults: number;
   status: 'pending' | 'confirmed' | 'cancelled';
+  rentType?: 'monthly' | 'daily';
+}
+
+export interface Purchase {
+  id: string;
+  propertyId: string;
+  userId: string;
+  price: number;
+  status: 'pending' | 'paid';
+  createdAt: string;
 }
 
 export interface Chat {
